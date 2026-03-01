@@ -3,7 +3,7 @@ export default {
   Chinese: '中文, 汉语, 漢語',
   English: 'English',
   French: 'Français',
-  Indonesian: 'Bahasa Indonesia',
+  Indonesian: 'Indonesia',
   Japanese: '日本語',
   Korean: '조선말, 한국어',
   Polish: 'Polski',
