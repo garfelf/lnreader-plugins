@@ -245,3 +245,4 @@ class SakuraNovel implements Plugin.PluginBase {
 }
 
 export default new SakuraNovel();
+
