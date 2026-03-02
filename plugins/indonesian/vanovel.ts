@@ -9,24 +9,61 @@ class Vanovel implements Plugin.PluginBase {
   site = 'https://vanovel.com/';
   version = '1.0.0';
 
-  parseNovels($: CheerioAPI) {
-  const novels: Plugin.NovelItem[] = [];
+  async parseNovel(novelPath: string): Promise<Plugin.SourceNovel> {
+  const result = await fetchApi(this.site + novelPath);
+  const body = await result.text();
+  const $ = parseHTML(body);
 
-  $('.page-item-detail').each((_, el) => {
-    const name = $(el).find('.post-title a').text().trim();
-    const cover = $(el).find('img').attr('data-src') || $(el).find('img').attr('src');
-    const url = $(el).find('.post-title a').attr('href');
+  const novel: Plugin.SourceNovel = {
+    path: novelPath,
+    name: $('.post-title h1').first().text().trim(),
+    cover: $('.summary_image img').attr('data-src') || 
+           $('.summary_image img').attr('src'),
+    author: $('.author-content a').text().trim(),
+    summary: $('.summary__content').text().trim(),
+    status: $('.post-status .summary-content')
+      .first()
+      .text()
+      .trim(),
+    chapters: [],
+  };
+
+  // 🔥 IMPORTANT: ambil daftar chapter dari AJAX endpoint
+  const mangaId = $('#manga-chapters-holder').attr('data-id');
+
+  if (!mangaId) return novel;
+
+  const ajax = await fetchApi(
+    `${this.site}wp-admin/admin-ajax.php`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      },
+      body: `action=wp-manga-get-chapters&manga=${mangaId}`,
+    },
+  );
+
+  const chapterHtml = await ajax.text();
+  const $$ = parseHTML(chapterHtml);
+
+  const chapters: Plugin.ChapterItem[] = [];
+
+  $$('.wp-manga-chapter a').each((_, el) => {
+    const name = $$(el).text().trim();
+    const url = $$(el).attr('href');
 
     if (!url) return;
 
-    novels.push({
+    chapters.push({
       name,
-      cover,
       path: url.replace(this.site, ''),
     });
   });
 
-  return novels;
+  novel.chapters = chapters.reverse();
+
+  return novel;
 }
 
   async popularNovels(page = 1): Promise<Plugin.NovelItem[]> {
