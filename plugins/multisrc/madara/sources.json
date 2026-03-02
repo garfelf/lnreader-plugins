@@ -77,7 +77,7 @@
   "sourceSite": "https://meionovels.com/",
   "sourceName": "MeioNovel",
   "options": {
-    "useNewChapterEndpoint": false,
+    "useNewChapterEndpoint": true,
     "lang": "Indonesian",
     "versionIncrements": 2
   }
