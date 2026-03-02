@@ -7,7 +7,7 @@ class MeioNovel implements Plugin.PluginBase {
   name = 'MeioNovel';
   icon = 'src/id/meionovel/icon.png';
   site = 'https://meionovels.com/';
-  version = '1.0.0';
+  version = '1.0.1';
 
   parseNovels($: CheerioAPI) {
     const novels: Plugin.NovelItem[] = [];
@@ -49,12 +49,7 @@ class MeioNovel implements Plugin.PluginBase {
   }
 
   async parseNovel(novelPath: string): Promise<Plugin.SourceNovel> {
-  const res = await fetchApi(this.site + novelPath, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0',
-    },
-  });
-
+  const res = await fetchApi(this.site + novelPath);
   const body = await res.text();
   const $ = parseHTML(body);
 
@@ -68,10 +63,7 @@ class MeioNovel implements Plugin.PluginBase {
       $('.summary_image img').attr('src'),
     author: $('.author-content a').text().trim(),
     summary: $('.summary__content').text().trim(),
-    status: $('.post-status .summary-content')
-      .last()
-      .text()
-      .trim(),
+    status: $('.post-status .summary-content').last().text().trim(),
     chapters: [],
   };
 
@@ -83,8 +75,11 @@ class MeioNovel implements Plugin.PluginBase {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Origin': this.site,
+        'Referer': this.site + novelPath,
         'User-Agent': 'Mozilla/5.0',
-        Referer: this.site + novelPath,
+        'Accept': '*/*',
       },
       body: `action=wp-manga-get-chapters&manga=${mangaId}`,
     }
