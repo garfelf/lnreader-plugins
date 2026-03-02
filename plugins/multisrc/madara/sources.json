@@ -8,16 +8,6 @@
       "downSince": 1768289212925
     }
   },
-    {
-  "id": "meionovel",
-  "sourceSite": "https://meionovels.com/",
-  "sourceName": "MeioNovel",
-  "options": {
-    "useNewChapterEndpoint": true,
-    "lang": "Indonesian",
-    "versionIncrements": 3
-  }
-},
   {
     "id": "lunarletters",
     "sourceSite": "https://lunarletters.com/",
@@ -82,6 +72,16 @@
     }
   },
   {
+    "id": "meionovel",
+    "sourceSite": "https://meionovels.com/",
+    "sourceName": "MeioNovel",
+    "options": {
+      "useNewChapterEndpoint": true,
+      "lang": "Indonesian",
+      "versionIncrements": 1
+    }
+  },
+  {
     "id": "webnovelover",
     "sourceSite": "https://www.webnovelover.com/",
     "sourceName": "WebNovelLover",
@@ -119,8 +119,8 @@
     "sourceSite": "https://vanovel.com",
     "sourceName": "Vanovel",
     "options": {
-      "useNewChapterEndpoint": true,
-      "versionIncrements": 2,
+      "useNewChapterEndpoint": false,
+      "versionIncrements": 3,
       "lang": "Indonesian"
     }
   },
