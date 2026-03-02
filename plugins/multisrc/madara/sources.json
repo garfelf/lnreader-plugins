@@ -72,16 +72,15 @@
     }
   },
   {
-  {
-  "id": "meionovel",
-  "sourceSite": "https://meionovels.com/",
-  "sourceName": "MeioNovel",
-  "options": {
-    "useNewChapterEndpoint": true,
-    "lang": "Indonesia",
-    "versionIncrements": 3
-  }
-},
+    "id": "meionovel",
+    "sourceSite": "https://meionovels.com/",
+    "sourceName": "MeioNovel",
+    "options": {
+      "useNewChapterEndpoint": true,
+      "lang": "Indonesian",
+      "versionIncrements": 1
+    }
+  },
   {
     "id": "webnovelover",
     "sourceSite": "https://www.webnovelover.com/",
