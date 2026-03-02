@@ -1,18 +1,18 @@
-import { Madara } from "../../multisrc/madara/Madara"
+import Madara from "../../multisrc/madara"
 
 class Vanovel extends Madara {
   id = "vanovel"
   name = "Vanovel"
   lang = "id"
   baseUrl = "https://vanovel.com"
-  version = "1.0.0"
+  version = "1.0.1"
 
   async fetchChapters(novelUrl: string) {
     const cleanUrl = novelUrl.replace(/\/$/, "")
     const response = await this.client.get(`${cleanUrl}/chapters/?t=1`)
     const $ = this.cheerio.load(response.data)
 
-    const chapters: { name: string; url: string }[] = []
+    const chapters = []
 
     $(".wp-manga-chapter a").each((_, el) => {
       const name = $(el).text().trim()
