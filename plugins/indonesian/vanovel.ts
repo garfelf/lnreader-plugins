@@ -10,31 +10,33 @@ class Vanovel implements Plugin.PluginBase {
   version = '1.0.0';
 
   parseNovels($: CheerioAPI) {
-    const novels: Plugin.NovelItem[] = [];
+  const novels: Plugin.NovelItem[] = [];
 
-    $('article.post').each((_, el) => {
-      const name = $(el).find('.entry-title').text().trim();
-      const cover = $(el).find('img').attr('src');
-      const url = $(el).find('a').attr('href');
+  $('.page-item-detail').each((_, el) => {
+    const name = $(el).find('.post-title a').text().trim();
+    const cover = $(el).find('img').attr('data-src') || $(el).find('img').attr('src');
+    const url = $(el).find('.post-title a').attr('href');
 
-      if (!url) return;
+    if (!url) return;
 
-      novels.push({
-        name,
-        cover,
-        path: url.replace(this.site, ''),
-      });
+    novels.push({
+      name,
+      cover,
+      path: url.replace(this.site, ''),
     });
+  });
 
-    return novels;
-  }
+  return novels;
+}
 
   async popularNovels(page = 1): Promise<Plugin.NovelItem[]> {
-    const result = await fetchApi(`${this.site}page/${page}/?s`);
-    const body = await result.text();
-    const $ = parseHTML(body);
-    return this.parseNovels($);
-  }
+  const result = await fetchApi(
+    `${this.site}manga/?page=${page}&m_orderby=views`
+  );
+  const body = await result.text();
+  const $ = parseHTML(body);
+  return this.parseNovels($);
+}
 
   async parseNovel(novelPath: string): Promise<Plugin.SourceNovel> {
     const result = await fetchApi(this.site + novelPath);
@@ -87,17 +89,14 @@ class Vanovel implements Plugin.PluginBase {
     return $('.reading-content').html() || '';
   }
 
-  async searchNovels(
-    searchTerm: string,
-    page = 1,
-  ): Promise<Plugin.NovelItem[]> {
-    const result = await fetchApi(
-      `${this.site}page/${page}/?s=${searchTerm}`,
-    );
-    const body = await result.text();
-    const $ = parseHTML(body);
-    return this.parseNovels($);
-  }
+  async searchNovels(searchTerm: string, page = 1) {
+  const result = await fetchApi(
+    `${this.site}?s=${searchTerm}&post_type=wp-manga&page=${page}`
+  );
+  const body = await result.text();
+  const $ = parseHTML(body);
+  return this.parseNovels($);
+}
 }
 
 export default new Vanovel();
