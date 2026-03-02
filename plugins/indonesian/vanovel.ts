@@ -65,6 +65,9 @@ class Vanovel implements Plugin.PluginBase {
     const body = await result.text();
     const $ = parseHTML(body);
 
+    const mangaId = $('#manga-chapters-holder').attr('data-id');
+console.log('MANGA ID:', mangaId);
+    
     const novel: Plugin.SourceNovel = {
       path: novelPath,
       name: $('.post-title h1').first().text().trim(),
