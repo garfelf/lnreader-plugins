@@ -7,7 +7,7 @@ class MeioNovel implements Plugin.PluginBase {
   name = 'MeioNovel';
   icon = 'src/id/meionovel/icon.png';
   site = 'https://meionovels.com/';
-  version = '1.0.2';
+  version = '1.0.3';
 
   parseNovels($: CheerioAPI) {
     const novels: Plugin.NovelItem[] = [];
@@ -68,12 +68,9 @@ class MeioNovel implements Plugin.PluginBase {
     chapters: [],
   };
 
-  // 🔥 ambil langsung endpoint chapters
   const chaptersRes = await fetchApi(
     `${this.site}${novelPath.replace(/\/$/, '')}/chapters/`,
-    {
-      headers: { 'User-Agent': 'Mozilla/5.0' },
-    }
+    { headers: { 'User-Agent': 'Mozilla/5.0' } }
   );
 
   const chaptersBody = await chaptersRes.text();
@@ -81,9 +78,11 @@ class MeioNovel implements Plugin.PluginBase {
 
   const chapters: Plugin.ChapterItem[] = [];
 
-  $$('.wp-manga-chapter a').each((_, el) => {
-    const name = $$(el).text().trim();
-    const url = $$(el).attr('href');
+  $$('li.wp-manga-chapter').each((_, el) => {
+    const anchor = $$(el).find('a').first();
+    const name = anchor.text().trim();
+    const url = anchor.attr('href');
+
     if (!url) return;
 
     chapters.push({
@@ -92,7 +91,7 @@ class MeioNovel implements Plugin.PluginBase {
     });
   });
 
-  novel.chapters = chapters.reverse();
+  novel.chapters = chapters;
 
   return novel;
 }
