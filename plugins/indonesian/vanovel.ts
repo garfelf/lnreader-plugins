@@ -7,8 +7,10 @@ class Vanovel implements Plugin.PluginBase {
   name = 'Vanovel';
   icon = 'src/id/vanovel/icon.png';
   site = 'https://vanovel.com/';
-  version = '1.0.3';
+  version = '1.0.4';
 
+  useWebView = true;
+  
   parseNovels($: CheerioAPI) {
     const novels: Plugin.NovelItem[] = [];
 
