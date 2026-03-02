@@ -7,7 +7,11 @@ class MeioNovel implements Plugin.PluginBase {
   name = 'MeioNovel';
   icon = 'src/id/meionovel/icon.png';
   site = 'https://meionovels.com/';
-  version = '1.0.3';
+  version = '1.0.4';
+
+  // =========================
+  // LIST
+  // =========================
 
   parseNovels($: CheerioAPI) {
     const novels: Plugin.NovelItem[] = [];
@@ -16,6 +20,7 @@ class MeioNovel implements Plugin.PluginBase {
       const anchor = $(el).find('.post-title a').first();
       const name = anchor.text().trim();
       const url = anchor.attr('href');
+
       const cover =
         $(el).find('.item-thumb img').attr('data-src') ||
         $(el).find('.item-thumb img').attr('src');
@@ -41,63 +46,85 @@ class MeioNovel implements Plugin.PluginBase {
 
   async searchNovels(searchTerm: string, page = 1) {
     const res = await fetchApi(
-      `${this.site}?s=${searchTerm}&page=${page}`
+      `${this.site}?s=${searchTerm}&post_type=wp-manga&page=${page}`
     );
     const body = await res.text();
     const $ = parseHTML(body);
     return this.parseNovels($);
   }
 
+  // =========================
+  // DETAIL + CHAPTER LIST
+  // =========================
+
   async parseNovel(novelPath: string): Promise<Plugin.SourceNovel> {
-  const res = await fetchApi(this.site + novelPath, {
-    headers: { 'User-Agent': 'Mozilla/5.0' },
-  });
-
-  const body = await res.text();
-  const $ = parseHTML(body);
-
-  const novel: Plugin.SourceNovel = {
-    path: novelPath,
-    name: $('.post-title h1').text().trim(),
-    cover:
-      $('.summary_image img').attr('data-src') ||
-      $('.summary_image img').attr('src'),
-    author: $('.author-content a').text().trim(),
-    summary: $('.summary__content').text().trim(),
-    status: $('.post-status .summary-content').last().text().trim(),
-    chapters: [],
-  };
-
-  const chaptersRes = await fetchApi(
-    `${this.site}${novelPath.replace(/\/$/, '')}/chapters/`,
-    { headers: { 'User-Agent': 'Mozilla/5.0' } }
-  );
-
-  const chaptersBody = await chaptersRes.text();
-  const $$ = parseHTML(chaptersBody);
-
-  const chapters: Plugin.ChapterItem[] = [];
-
-  $$('li.wp-manga-chapter').each((_, el) => {
-    const anchor = $$(el).find('a').first();
-    const name = anchor.text().trim();
-    const url = anchor.attr('href');
-
-    if (!url) return;
-
-    chapters.push({
-      name,
-      path: url.replace(this.site, ''),
+    const detailRes = await fetchApi(this.site + novelPath, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+      },
     });
-  });
 
-  novel.chapters = chapters;
+    const detailBody = await detailRes.text();
+    const $ = parseHTML(detailBody);
 
-  return novel;
-}
+    const novel: Plugin.SourceNovel = {
+      path: novelPath,
+      name: $('.post-title h1').text().trim(),
+      cover:
+        $('.summary_image img').attr('data-src') ||
+        $('.summary_image img').attr('src'),
+      author: $('.author-content a').text().trim(),
+      summary: $('.summary__content').text().trim(),
+      status: $('.post-status .summary-content').last().text().trim(),
+      chapters: [],
+    };
+
+    // 🔥 ambil endpoint chapters
+    const chaptersUrl = `${this.site}${novelPath.replace(/\/$/, '')}/chapters/`;
+
+    const chaptersRes = await fetchApi(chaptersUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+        'X-Requested-With': 'XMLHttpRequest',
+        Referer: this.site + novelPath,
+        Origin: this.site.replace(/\/$/, ''),
+      },
+    });
+
+    const chaptersBody = await chaptersRes.text();
+    const $$ = parseHTML(chaptersBody);
+
+    const chapters: Plugin.ChapterItem[] = [];
+
+    $$('li.wp-manga-chapter').each((_, el) => {
+      const anchor = $$(el).find('a').first();
+      const name = anchor.text().trim();
+      const url = anchor.attr('href');
+
+      if (!url) return;
+
+      chapters.push({
+        name,
+        path: url.replace(this.site, ''),
+      });
+    });
+
+    novel.chapters = chapters;
+
+    return novel;
+  }
+
+  // =========================
+  // CHAPTER CONTENT
+  // =========================
 
   async parseChapter(chapterPath: string) {
-    const res = await fetchApi(this.site + chapterPath);
+    const res = await fetchApi(this.site + chapterPath, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+      },
+    });
+
     const body = await res.text();
     const $ = parseHTML(body);
 
