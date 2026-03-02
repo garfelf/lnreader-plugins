@@ -52,50 +52,48 @@ class Vanovel implements Plugin.PluginBase {
   }
 
   async parseNovel(novelPath: string): Promise<Plugin.SourceNovel> {
-    const result = await fetchApi(this.site + novelPath);
-    const body = await result.text();
-    const $ = parseHTML(body);
+  const result = await fetchApi(this.site + novelPath, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0',
+    },
+  });
 
-    const novel: Plugin.SourceNovel = {
-      path: novelPath,
-      name: $('.post-title h1').first().text().trim(),
-      cover:
-        $('.summary_image img').attr('data-src') ||
-        $('.summary_image img').attr('src'),
-      author: $('.author-content a').text().trim(),
-      summary: $('.summary__content').text().trim(),
-      status: $('.post-status .summary-content')
-        .first()
-        .text()
-        .trim(),
-      chapters: [],
-    };
+  const body = await result.text();
+  const $ = parseHTML(body);
 
-    const chapterResult = await fetchApi(
-      `${this.site}${novelPath.replace(/\/$/, '')}/ajax/chapters/`
-    );
+  const novel: Plugin.SourceNovel = {
+    path: novelPath,
+    name: $('.post-title h1').first().text().trim(),
+    cover:
+      $('.summary_image img').attr('data-src') ||
+      $('.summary_image img').attr('src'),
+    author: $('.author-content a').text().trim(),
+    summary: $('.summary__content').text().trim(),
+    status: $('.post-status .summary-content')
+      .first()
+      .text()
+      .trim(),
+    chapters: [],
+  };
 
-    const chapterBody = await chapterResult.text();
-    const $$ = parseHTML(chapterBody);
+  const chapters: Plugin.ChapterItem[] = [];
 
-    const chapters: Plugin.ChapterItem[] = [];
+  $('.page-content-listing li.wp-manga-chapter a').each((_, el) => {
+    const name = $(el).text().trim();
+    const url = $(el).attr('href');
 
-    $$('.wp-manga-chapter a').each((_, el) => {
-      const name = $$(el).text().trim();
-      const url = $$(el).attr('href');
+    if (!url) return;
 
-      if (!url) return;
-
-      chapters.push({
-        name,
-        path: url.replace(this.site, ''),
-      });
+    chapters.push({
+      name,
+      path: url.replace(this.site, ''),
     });
+  });
 
-    novel.chapters = chapters.reverse();
+  novel.chapters = chapters.reverse();
 
-    return novel;
-  }
+  return novel;
+}
 
   async parseChapter(chapterPath: string) {
     const result = await fetchApi(this.site + chapterPath);
