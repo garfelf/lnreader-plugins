@@ -7,7 +7,7 @@ class MeioNovel implements Plugin.PluginBase {
   name = 'MeioNovel';
   icon = 'src/id/meionovel/icon.png';
   site = 'https://meionovels.com/';
-  version = '1.0.1';
+  version = '1.0.2';
 
   parseNovels($: CheerioAPI) {
     const novels: Plugin.NovelItem[] = [];
@@ -49,11 +49,12 @@ class MeioNovel implements Plugin.PluginBase {
   }
 
   async parseNovel(novelPath: string): Promise<Plugin.SourceNovel> {
-  const res = await fetchApi(this.site + novelPath);
+  const res = await fetchApi(this.site + novelPath, {
+    headers: { 'User-Agent': 'Mozilla/5.0' },
+  });
+
   const body = await res.text();
   const $ = parseHTML(body);
-
-  const mangaId = $('#manga-chapters-holder').attr('data-id');
 
   const novel: Plugin.SourceNovel = {
     path: novelPath,
@@ -67,33 +68,22 @@ class MeioNovel implements Plugin.PluginBase {
     chapters: [],
   };
 
-  if (!mangaId) return novel;
-
-  const ajaxRes = await fetchApi(
-    `${this.site}wp-admin/admin-ajax.php`,
+  // 🔥 ambil langsung endpoint chapters
+  const chaptersRes = await fetchApi(
+    `${this.site}${novelPath.replace(/\/$/, '')}/chapters/`,
     {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Origin': this.site,
-        'Referer': this.site + novelPath,
-        'User-Agent': 'Mozilla/5.0',
-        'Accept': '*/*',
-      },
-      body: `action=wp-manga-get-chapters&manga=${mangaId}`,
+      headers: { 'User-Agent': 'Mozilla/5.0' },
     }
   );
 
-  const chapterHtml = await ajaxRes.text();
-  const $$ = parseHTML(chapterHtml);
+  const chaptersBody = await chaptersRes.text();
+  const $$ = parseHTML(chaptersBody);
 
   const chapters: Plugin.ChapterItem[] = [];
 
   $$('.wp-manga-chapter a').each((_, el) => {
     const name = $$(el).text().trim();
     const url = $$(el).attr('href');
-
     if (!url) return;
 
     chapters.push({
