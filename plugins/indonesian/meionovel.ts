@@ -1,4 +1,4 @@
-import { Madara } from "../../multisrc/madara"
+import { Madara } from "../../multisrc/madara/Madara"
 
 class MeioNovel extends Madara {
   id = "meionovel"
