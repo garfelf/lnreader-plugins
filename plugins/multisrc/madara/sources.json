@@ -115,16 +115,6 @@
     }
   },
   {
-    "id": "morenovel",
-    "sourceSite": "https://vanovel.com/",
-    "sourceName": "Vanovel",
-    "options": {
-      "useNewChapterEndpoint": true,
-      "versionIncrements": 4,
-      "lang": "Indonesian"
-    }
-  },
-  {
     "id": "hizomanga",
     "sourceSite": "https://hizomanga.net/",
     "sourceName": "HizoManga",
