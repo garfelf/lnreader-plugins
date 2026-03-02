@@ -14,35 +14,38 @@ class Vanovel implements Plugin.PluginBase {
   // =========================
 
   parseNovels($: CheerioAPI) {
-    const novels: Plugin.NovelItem[] = [];
+  const novels: Plugin.NovelItem[] = [];
 
-    $('.page-item-detail').each((_, el) => {
-      const name = $(el).find('.post-title a').text().trim();
-      const cover =
-        $(el).find('img').attr('data-src') ||
-        $(el).find('img').attr('src');
-      const url = $(el).find('.post-title a').attr('href');
+  $('.page-item-detail').each((_, el) => {
+    const anchor = $(el).find('.post-title h3 a').first();
 
-      if (!url) return;
+    const name = anchor.text().trim();
+    const url = anchor.attr('href');
 
-      novels.push({
-        name,
-        cover,
-        path: url.replace(this.site, ''),
-      });
+    const cover =
+      $(el).find('.item-thumb img').attr('data-src') ||
+      $(el).find('.item-thumb img').attr('src');
+
+    if (!url) return;
+
+    novels.push({
+      name,
+      cover,
+      path: url.replace(this.site, ''),
     });
+  });
 
-    return novels;
-  }
+  return novels;
+}
 
   async popularNovels(page = 1): Promise<Plugin.NovelItem[]> {
-    const result = await fetchApi(
-      `${this.site}manga/?page=${page}&m_orderby=views`
-    );
-    const body = await result.text();
-    const $ = parseHTML(body);
-    return this.parseNovels($);
-  }
+  const result = await fetchApi(
+    `${this.site}manga/?m_orderby=views&page=${page}`
+  );
+  const body = await result.text();
+  const $ = parseHTML(body);
+  return this.parseNovels($);
+}
 
   async searchNovels(searchTerm: string, page = 1) {
     const result = await fetchApi(
