@@ -8,6 +8,16 @@
       "downSince": 1768289212925
     }
   },
+    {
+  "id": "meionovel",
+  "sourceSite": "https://meionovels.com/",
+  "sourceName": "MeioNovel",
+  "options": {
+    "useNewChapterEndpoint": false,
+    "lang": "Indonesian",
+    "versionIncrements": 2
+  }
+},
   {
     "id": "lunarletters",
     "sourceSite": "https://lunarletters.com/",
